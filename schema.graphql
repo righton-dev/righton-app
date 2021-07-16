@@ -1,68 +1,106 @@
-schema {
-  query: Query
-  mutation: Mutation
-}
-
 type Game {
-  cluster: String
-  createdAt: AWSDateTime
-  description: String
-  domain: String
-  grade: String
-  id: ID!
-  standard: String
-  title: String!
-  updatedAt: AWSDateTime
+	id: ID!
+	title: String!
+	description: String
+	cluster: String
+	domain: String
+	grade: String
+	standard: String
+	updatedAt: AWSDateTime
+	createdAt: AWSDateTime
+	questions: [Question]
 }
 
 type GameSession {
-  gameCode: Int!
-  gameId: ID!
-  gameSessionID: ID!
-  hintsRevealTime: Int
-  multiDeviceMode: Boolean!
-  startedDateTimeUTC: AWSDateTime!
-  state: GameSessionState!
-  teamIds: [Int]!
-  votingTime: Int
+	gameSessionID: ID!
+	gameId: ID!
+	teamIds: [Int]!
+	startedDateTimeUTC: AWSDateTime
+	gameCode: Int!
+	multiDeviceMode: Boolean!
+	votingTime: Int
+	hintsRevealTime: Int
+	state: GameSessionState!
+	random: AWSJSON
 }
 
-type Mutation {
-  saveGameSession(gameSession: GameSessionInput): GameSession
-}
-
-type Query {
-  getGame(gameId: ID): Game
-  listGames: [Game]
-  listQuestions: [Question]
-}
-
-type Question {
-  answer: String!
-  createdAt: AWSDateTime
-  id: ID!
-  imageURL: String
-  instructions: AWSJSON
-  text: String!
-  updatedAt: AWSDateTime
-}
-
-enum GameSessionState {
-  ChoosingTrickAnswer
-  Finished
-  InitialIntro
-  NotStarted
-  ReviewingResult
-  Voting
+type GameSessionConfig {
+	configVersion: Int!
+	pointsForMostPopularTrickAnswer: Int!
+	pointsPerCorrectAnswer: Int!
+	votingTime: Int!
+	hintsRevealTime: Int!
 }
 
 input GameSessionInput {
-  gameCode: Int
-  gameId: ID!
-  hintsRevealTime: Int
-  id: ID!
-  multiDeviceMode: Boolean!
-  startedDateTimeUTC: AWSDateTime
-  teamIds: [Int]
-  votingTime: Int
+	gameId: ID!
+	teamIds: [Int]
+	startedDateTimeUTC: AWSDateTime
+	gameCode: Int
+	multiDeviceMode: Boolean!
+	votingTime: Int
+	hintsRevealTime: Int
+	state: GameSessionState!
+}
+
+enum GameSessionState {
+	NotStarted
+	InitialIntro
+	ChoosingTrickAnswer
+	Voting
+	ReviewingResult
+	Finished
+}
+
+type Mutation {
+	saveGameSession(gameSession: GameSessionInput): GameSession!
+	joinGameSession(gameCode: Int!): GameSession!
+	joinGame(gameCode: Int!): GameSession!
+	createGame(
+		id: ID!,
+		title: String!,
+		description: String,
+		cluster: String,
+		domain: String,
+		grade: String,
+		standard: String,
+		updatedAt: AWSDateTime,
+		createdAt: AWSDateTime,
+		question: ID
+	): Game
+	updateGame(
+		id: ID!,
+		title: String!,
+		description: String,
+		cluster: String,
+		domain: String,
+		grade: String,
+		standard: String,
+		updatedAt: AWSDateTime,
+		createdAt: AWSDateTime,
+		question: ID
+	): Game!
+	deleteGame(gameId: ID!): Game!
+}
+
+type Query {
+	listGames: [Game]
+	listQuestions: [Question]
+	getGame(gameId: ID): Game!
+	getGameSessionConfig: GameSessionConfig
+}
+
+type Question {
+	id: ID!
+	text: String!
+	answer: String!
+	imageURL: String
+	instructions: AWSJSON
+	updatedAt: AWSDateTime
+	createdAt: AWSDateTime
+}
+
+schema {
+	query: Query
+	mutation: Mutation
 }
